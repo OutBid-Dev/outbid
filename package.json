@@ -1,0 +1,37 @@
+{
+    "name": "outbid",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Outbid monorepo",
+    "scripts": {
+        "dev:web": "pnpm --dir web dev",
+        "build:web": "pnpm --dir web build",
+        "lint:web": "pnpm --dir web lint",
+        "format:web": "pnpm --dir web format",
+        "typecheck:web": "pnpm --dir web typecheck",
+        "prepare": "husky"
+    },
+    "devEngines": {
+        "packageManager": {
+            "name": "pnpm",
+            "version": "12.4.2",
+            "onFail": "download"
+        }
+    },
+    "packageManager": "pnpm@12.4.2",
+    "type": "module",
+    "devDependencies": {
+        "husky": "^9.1.7",
+        "lint-staged": "^17.5.1",
+        "prettier": "^3.9.8"
+    },
+    "lint-staged": {
+        "web/src/**/*.{ts,tsx}": [
+            "pnpm --dir web exec eslint",
+            "pnpm --dir web exec prettier --write"
+        ],
+        "web/src/**/*.{css}": [
+            "pnpm --dir web exec prettier --write"
+        ]
+    }
+}

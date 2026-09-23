@@ -9,6 +9,10 @@
         "lint:web": "pnpm --dir web lint",
         "format:web": "pnpm --dir web format",
         "typecheck:web": "pnpm --dir web typecheck",
+        "format:api": "api\\mvnw.cmd -f api\\pom.xml spotless:apply",
+        "lint:api": "api\\mvnw.cmd -f api\\pom.xml checkstyle:check",
+        "test:api": "api\\mvnw.cmd -f api\\pom.xml test",
+        "check:api": "api\\mvnw.cmd -f api\\pom.xml verify",
         "prepare": "husky"
     },
     "devEngines": {
@@ -32,6 +36,10 @@
         ],
         "web/src/**/*.{css}": [
             "pnpm --dir web exec prettier --write"
+        ],
+        "api/src/**/*.java": [
+            "pnpm format:api",
+            "pnpm lint:api"
         ]
     }
 }

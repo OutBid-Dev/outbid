@@ -1,0 +1,54 @@
+package com.outbid.api.auth.service;
+
+import com.outbid.api.auth.model.Account;
+import com.outbid.api.auth.model.User;
+import com.outbid.api.auth.repository.AccountRepository;
+import com.outbid.api.common.exceptions.BadRequestException;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Base64;
+
+@Service
+public class RefreshTokenServiceImpl implements RefreshTokenService {
+    private final AccountRepository accountRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final Duration refreshTokenExpiration;
+
+    private final SecureRandom secureRandom = new SecureRandom();
+
+    public RefreshTokenServiceImpl(AccountRepository accountRepository, PasswordEncoder passwordEncoder,
+                    @Value("${app.jwt.refresh-token-expiration}") Duration refreshTokenExpiration) {
+        this.accountRepository = accountRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.refreshTokenExpiration = refreshTokenExpiration;
+    }
+
+    @Transactional
+    public String create(User user) {
+        Account account = accountRepository.findByUserId(user.getId())
+                        .orElseThrow(() -> new BadRequestException("Invalid account"));
+
+        String token = generateToken();
+
+        account.setRefreshToken(passwordEncoder.encode(token));
+        account.setRefreshTokenExpiresAt(Instant.now().plus(refreshTokenExpiration));
+        account.setUpdatedAt(Instant.now());
+
+        accountRepository.save(account);
+
+        return token;
+    }
+
+    private String generateToken() {
+        byte[] bytes = new byte[32];
+        secureRandom.nextBytes(bytes);
+
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+}

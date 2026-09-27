@@ -8,71 +8,95 @@
     <!-- ====================================================== -->
     <!-- General                                                -->
     <!-- ====================================================== -->
-
     <property name="charset" value="UTF-8"/>
-
+    <module name="FileTabCharacter"/>
     <module name="LineLength">
+        <property name="fileExtensions" value="java"/>
         <property name="max" value="120"/>
         <property name="ignorePattern"
-                  value="^package.*|^import.*"/>
+                  value="^package.*|^import.*|http://|https://|ftp://"/>
     </module>
-
-    <module name="FileTabCharacter"/>
-
 
     <!-- ====================================================== -->
     <!-- Java source rules                                      -->
     <!-- ====================================================== -->
-
     <module name="TreeWalker">
+        <!-- ================================================== -->
+        <!-- Imports                                            -->
+        <!-- ================================================== -->
+        <module name="AvoidStarImport"/>
+        <module name="UnusedImports"/>
 
         <!-- ================================================== -->
         <!-- Naming                                             -->
         <!-- ================================================== -->
-
+        <module name="PackageName"/>
         <module name="TypeName"/>
-
         <module name="MethodName"/>
-
         <module name="ParameterName"/>
-
         <module name="LocalVariableName"/>
-
         <module name="MemberName"/>
-
         <module name="ConstantName"/>
 
+        <!-- ================================================== -->
+        <!-- Indentation                                        -->
+        <!-- ================================================== -->
+        <module name="Indentation">
+            <property name="basicOffset" value="4"/>
+            <property name="braceAdjustment" value="4"/>
+            <property name="caseIndent" value="4"/>
+            <property name="throwsIndent" value="4"/>
+            <property name="lineWrappingIndentation" value="4"/>
+            <property name="arrayInitIndent" value="4"/>
+        </module>
 
         <!-- ================================================== -->
-        <!-- Imports                                            -->
+        <!-- Braces & whitespace                                -->
         <!-- ================================================== -->
+        <module name="NeedBraces"/>
+        <module name="LeftCurly"/>
+        <module name="RightCurly"/>
+        <module name="WhitespaceAfter"/>
+        <module name="WhitespaceAround"/>
+        <module name="ParenPad"/>
+        <module name="NoWhitespaceBefore"/>
+        <module name="MethodParamPad"/>
 
-        <module name="AvoidStarImport"/>
-
-        <module name="UnusedImports"/>
-
+        <!-- ================================================== -->
+        <!-- Operators                                           -->
+        <!-- ================================================== -->
+        <module name="OperatorWrap"/>
 
         <!-- ================================================== -->
         <!-- Code structure                                     -->
         <!-- ================================================== -->
-
         <module name="EmptyBlock"/>
-
         <module name="EmptyStatement"/>
-
         <module name="EqualsHashCode"/>
-
         <module name="MissingSwitchDefault"/>
-
         <module name="FallThrough"/>
+        <module name="OneStatementPerLine"/>
+        <module name="MultipleVariableDeclarations"/>
 
         <!-- ================================================== -->
         <!-- Modifiers                                          -->
         <!-- ================================================== -->
-
         <module name="ModifierOrder"/>
-
         <module name="RedundantModifier"/>
+
+        <!-- ================================================== -->
+        <!-- Class structure                                    -->
+        <!-- ================================================== -->
+        <module name="OuterTypeFilename"/>
+        <module name="OneTopLevelClass"/>
+
+        <!-- ================================================== -->
+        <!-- Common Java issues                                 -->
+        <!-- ================================================== -->
+        <module name="ArrayTypeStyle"/>
+        <module name="UpperEll"/>
+        <module name="SimplifyBooleanExpression"/>
+        <module name="SimplifyBooleanReturn"/>
 
     </module>
 

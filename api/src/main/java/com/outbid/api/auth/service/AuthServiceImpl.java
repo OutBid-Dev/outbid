@@ -7,18 +7,18 @@ import com.outbid.api.auth.dto.response.AuthResponse;
 import com.outbid.api.auth.dto.response.UserResponse;
 import com.outbid.api.auth.model.Account;
 import com.outbid.api.auth.model.User;
+import com.outbid.api.auth.model.UserRole;
 import com.outbid.api.auth.repository.AccountRepository;
 import com.outbid.api.auth.repository.UserRepository;
 import com.outbid.api.auth.security.JWTService;
 import com.outbid.api.common.exceptions.BadRequestException;
 import com.outbid.api.common.exceptions.UnauthorizedException;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -28,9 +28,12 @@ public class AuthServiceImpl implements AuthService {
     private final JWTService jwtService;
     private final RefreshTokenService refreshTokenService;
 
-    public AuthServiceImpl(UserRepository userRepository, AccountRepository accountRepository,
-                    PasswordEncoder passwordEncoder, JWTService jwtService,
-                    RefreshTokenService refreshTokenService) {
+    public AuthServiceImpl(
+            UserRepository userRepository,
+            AccountRepository accountRepository,
+            PasswordEncoder passwordEncoder,
+            JWTService jwtService,
+            RefreshTokenService refreshTokenService) {
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
         this.passwordEncoder = passwordEncoder;
@@ -54,6 +57,7 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(request.email());
         user.setEmailVerified(false);
         user.setImage(request.image());
+        user.setRole(UserRole.BUYER);
         user.setCreatedAt(now);
         user.setUpdatedAt(now);
 
@@ -73,23 +77,35 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateAccessToken(savedUser);
         String refreshToken = refreshTokenService.create(savedUser);
 
-        UserResponse userResponse = new UserResponse(savedUser.getId(), savedUser.getFirstName(),
-                        savedUser.getLastName(), savedUser.getEmail(), savedUser.getEmailVerified(),
-                        savedUser.getImage(), savedUser.getCreatedAt(), savedUser.getUpdatedAt());
+        UserResponse userResponse =
+                new UserResponse(
+                        savedUser.getId(),
+                        savedUser.getFirstName(),
+                        savedUser.getLastName(),
+                        savedUser.getEmail(),
+                        savedUser.getEmailVerified(),
+                        savedUser.getImage(),
+                        savedUser.getRole(),
+                        savedUser.getCreatedAt(),
+                        savedUser.getUpdatedAt());
 
         return new AuthResponse(userResponse, accessToken, refreshToken);
     }
 
     @Override
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.email())
+        User user =
+                userRepository
+                        .findByEmail(request.email())
                         .orElseThrow(() -> new BadRequestException("Invalid email or password"));
 
-        Account account = accountRepository.findByUserId(user.getId())
+        Account account =
+                accountRepository
+                        .findByUserId(user.getId())
                         .orElseThrow(() -> new BadRequestException("Invalid email or password"));
 
-        boolean isPasswordCorrect = passwordEncoder.matches(request.password(),
-                        account.getPassword());
+        boolean isPasswordCorrect =
+                passwordEncoder.matches(request.password(), account.getPassword());
         if (!isPasswordCorrect) {
             throw new BadRequestException("Invalid email or password");
         }
@@ -97,9 +113,17 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = refreshTokenService.create(user);
 
-        UserResponse userResponse = new UserResponse(user.getId(), user.getFirstName(),
-                        user.getLastName(), user.getEmail(), user.getEmailVerified(),
-                        user.getImage(), user.getCreatedAt(), user.getUpdatedAt());
+        UserResponse userResponse =
+                new UserResponse(
+                        user.getId(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getEmail(),
+                        user.getEmailVerified(),
+                        user.getImage(),
+                        user.getRole(),
+                        user.getCreatedAt(),
+                        user.getUpdatedAt());
 
         return new AuthResponse(userResponse, accessToken, refreshToken);
     }
@@ -116,7 +140,7 @@ public class AuthServiceImpl implements AuthService {
             String storedRefreshToken = account.getRefreshToken();
 
             if (storedRefreshToken != null
-                            && passwordEncoder.matches(refreshToken, storedRefreshToken)) {
+                    && passwordEncoder.matches(refreshToken, storedRefreshToken)) {
 
                 account.setRefreshToken(null);
                 account.setRefreshTokenExpiresAt(null);
@@ -136,8 +160,13 @@ public class AuthServiceImpl implements AuthService {
             throw new UnauthorizedException("Invalid refresh token");
         }
 
-        Account account = refreshTokenService.validateRefreshToken(refreshToken).orElseThrow(
-                        () -> new UnauthorizedException("Invalid or expired refresh token"));
+        Account account =
+                refreshTokenService
+                        .validateRefreshToken(refreshToken)
+                        .orElseThrow(
+                                () ->
+                                        new UnauthorizedException(
+                                                "Invalid or expired refresh token"));
 
         User user = account.getUser();
 
@@ -147,12 +176,17 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void changePassword(UUID userId, ChangePasswordRequest request) {
-        Account account = accountRepository.findByUserIdAndProviderId(userId, "credential")
-                        .orElseThrow(() -> new BadRequestException(
-                                        "Password change is not available for this account"));
+        Account account =
+                accountRepository
+                        .findByUserIdAndProviderId(userId, "credential")
+                        .orElseThrow(
+                                () ->
+                                        new BadRequestException(
+                                                "Password change is not available for this"
+                                                        + " account"));
 
-        boolean currentPasswordCorrect = passwordEncoder.matches(request.currentPassword(),
-                        account.getPassword());
+        boolean currentPasswordCorrect =
+                passwordEncoder.matches(request.currentPassword(), account.getPassword());
 
         if (!currentPasswordCorrect) {
             throw new UnauthorizedException("Current password is incorrect");

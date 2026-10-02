@@ -24,16 +24,20 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .sessionManagement(session -> session
+                                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                         .authorizeHttpRequests(auth -> auth
-                                        .requestMatchers("/health", "/auth/register", "/auth/login", "/auth/refresh",
-                                                        "/auth/logout",
+                                        .requestMatchers("/health", "/auth/register", "/auth/login",
+                                                        "/auth/refresh", "/auth/logout",
 
                                                         // Swagger / OpenAPI
-                                                        "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
+                                                        "/swagger-ui.html", "/swagger-ui/**",
+                                                        "/v3/api-docs/**")
                                         .permitAll().anyRequest().authenticated())
-                        .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
-                        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                        .exceptionHandling(exception -> exception
+                                        .authenticationEntryPoint(authenticationEntryPoint))
+                        .addFilterBefore(jwtAuthenticationFilter,
+                                        UsernamePasswordAuthenticationFilter.class)
                         .httpBasic(AbstractHttpConfigurer::disable);
 
         return http.build();

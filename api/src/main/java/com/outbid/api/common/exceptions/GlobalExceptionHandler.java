@@ -31,8 +31,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex) {
-        List<ValidationError> errors = ex.getBindingResult().getFieldErrors().stream()
-                        .map(field -> new ValidationError(field.getField(), field.getDefaultMessage())).toList();
+        List<ValidationError> errors = ex.getBindingResult().getFieldErrors().stream().map(
+                        field -> new ValidationError(field.getField(), field.getDefaultMessage()))
+                        .toList();
 
         return ResponseEntity.badRequest().body(ApiError.of("Validation failed", errors));
     }
@@ -43,12 +44,15 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ApiError> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(ApiError.of("Method not allowed"));
+    public ResponseEntity<ApiError> handleMethodNotAllowed(
+                    HttpRequestMethodNotSupportedException ex) {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                        .body(ApiError.of("Method not allowed"));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleUnknown(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiError.of("Something went wrong"));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(ApiError.of("Something went wrong"));
     }
 }

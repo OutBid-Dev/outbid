@@ -1,5 +1,6 @@
 package com.outbid.api.auth.service;
 
+import com.outbid.api.auth.dto.request.ChangePasswordRequest;
 import com.outbid.api.auth.dto.request.LoginRequest;
 import com.outbid.api.auth.dto.request.RegisterRequest;
 import com.outbid.api.auth.dto.response.AuthResponse;
@@ -10,7 +11,8 @@ import com.outbid.api.auth.repository.AccountRepository;
 import com.outbid.api.auth.repository.UserRepository;
 import com.outbid.api.auth.security.JWTService;
 import com.outbid.api.common.exceptions.BadRequestException;
-import jakarta.transaction.Transactional;
+import com.outbid.api.common.exceptions.UnauthorizedException;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +29,8 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenService refreshTokenService;
 
     public AuthServiceImpl(UserRepository userRepository, AccountRepository accountRepository,
-                    PasswordEncoder passwordEncoder, JWTService jwtService, RefreshTokenService refreshTokenService) {
+                    PasswordEncoder passwordEncoder, JWTService jwtService,
+                    RefreshTokenService refreshTokenService) {
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
         this.passwordEncoder = passwordEncoder;
@@ -85,7 +88,8 @@ public class AuthServiceImpl implements AuthService {
         Account account = accountRepository.findByUserId(user.getId())
                         .orElseThrow(() -> new BadRequestException("Invalid email or password"));
 
-        boolean isPasswordCorrect = passwordEncoder.matches(request.password(), account.getPassword());
+        boolean isPasswordCorrect = passwordEncoder.matches(request.password(),
+                        account.getPassword());
         if (!isPasswordCorrect) {
             throw new BadRequestException("Invalid email or password");
         }
@@ -93,9 +97,9 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = refreshTokenService.create(user);
 
-        UserResponse userResponse = new UserResponse(user.getId(), user.getFirstName(), user.getLastName(),
-                        user.getEmail(), user.getEmailVerified(), user.getImage(), user.getCreatedAt(),
-                        user.getUpdatedAt());
+        UserResponse userResponse = new UserResponse(user.getId(), user.getFirstName(),
+                        user.getLastName(), user.getEmail(), user.getEmailVerified(),
+                        user.getImage(), user.getCreatedAt(), user.getUpdatedAt());
 
         return new AuthResponse(userResponse, accessToken, refreshToken);
     }
@@ -111,7 +115,8 @@ public class AuthServiceImpl implements AuthService {
         for (Account account : accounts) {
             String storedRefreshToken = account.getRefreshToken();
 
-            if (storedRefreshToken != null && passwordEncoder.matches(refreshToken, storedRefreshToken)) {
+            if (storedRefreshToken != null
+                            && passwordEncoder.matches(refreshToken, storedRefreshToken)) {
 
                 account.setRefreshToken(null);
                 account.setRefreshTokenExpiresAt(null);
@@ -122,5 +127,46 @@ public class AuthServiceImpl implements AuthService {
                 return;
             }
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public String refresh(String refreshToken) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new UnauthorizedException("Invalid refresh token");
+        }
+
+        Account account = refreshTokenService.validateRefreshToken(refreshToken).orElseThrow(
+                        () -> new UnauthorizedException("Invalid or expired refresh token"));
+
+        User user = account.getUser();
+
+        return jwtService.generateAccessToken(user);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(UUID userId, ChangePasswordRequest request) {
+        Account account = accountRepository.findByUserIdAndProviderId(userId, "credential")
+                        .orElseThrow(() -> new BadRequestException(
+                                        "Password change is not available for this account"));
+
+        boolean currentPasswordCorrect = passwordEncoder.matches(request.currentPassword(),
+                        account.getPassword());
+
+        if (!currentPasswordCorrect) {
+            throw new UnauthorizedException("Current password is incorrect");
+        }
+
+        if (passwordEncoder.matches(request.newPassword(), account.getPassword())) {
+            throw new BadRequestException("New password must be different from current password");
+        }
+
+        account.setPassword(passwordEncoder.encode(request.newPassword()));
+        account.setRefreshToken(null);
+        account.setRefreshTokenExpiresAt(null);
+        account.setUpdatedAt(Instant.now());
+
+        accountRepository.save(account);
     }
 }

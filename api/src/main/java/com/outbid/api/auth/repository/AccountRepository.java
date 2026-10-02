@@ -12,6 +12,8 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
 
     Optional<Account> findByUserId(UUID userId);
 
+    Optional<Account> findByUserIdAndProviderId(UUID userId, String providerId);
+
     boolean existsByUserId(UUID userId);
 
     List<Account> findAllByRefreshTokenIsNotNull();

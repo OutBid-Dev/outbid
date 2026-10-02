@@ -80,7 +80,7 @@
         <!-- ================================================== -->
 
         <setting id="org.eclipse.jdt.core.formatter.lineSplit"
-                 value="120"/>
+                 value="100"/>
 
         <setting id="org.eclipse.jdt.core.formatter.join_wrapped_lines"
                  value="true"/>

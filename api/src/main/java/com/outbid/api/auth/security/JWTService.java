@@ -28,8 +28,10 @@ public class JWTService {
     public String generateAccessToken(User user) {
         Instant now = Instant.now();
 
-        return Jwts.builder().subject(user.getId().toString()).claim("email", user.getEmail()).issuedAt(Date.from(now))
-                        .expiration(Date.from(now.plus(accessTokenExpiration))).signWith(secretKey).compact();
+        return Jwts.builder().subject(user.getId().toString()).claim("email", user.getEmail())
+                        .issuedAt(Date.from(now))
+                        .expiration(Date.from(now.plus(accessTokenExpiration))).signWith(secretKey)
+                        .compact();
     }
 
     public boolean isValid(String token) {
@@ -43,7 +45,8 @@ public class JWTService {
     }
 
     public UUID getUserId(String token) {
-        String subject = Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getSubject();
+        String subject = Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token)
+                        .getPayload().getSubject();
 
         return UUID.fromString(subject);
     }

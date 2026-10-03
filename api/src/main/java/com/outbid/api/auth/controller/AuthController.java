@@ -13,6 +13,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,8 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")
@@ -35,29 +34,29 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ApiResponse<UserResponse> register(@Valid @RequestBody RegisterRequest request,
-                    HttpServletResponse response) {
+    public ApiResponse<UserResponse> register(
+            @Valid @RequestBody RegisterRequest request, HttpServletResponse response) {
         AuthResponse result = authService.register(request);
 
-        response.addHeader(HttpHeaders.SET_COOKIE,
-                        authCookie.accessToken(result.accessToken()).toString());
+        response.addHeader(
+                HttpHeaders.SET_COOKIE, authCookie.accessToken(result.accessToken()).toString());
 
-        response.addHeader(HttpHeaders.SET_COOKIE,
-                        authCookie.refreshToken(result.refreshToken()).toString());
+        response.addHeader(
+                HttpHeaders.SET_COOKIE, authCookie.refreshToken(result.refreshToken()).toString());
 
         return ApiResponse.success("User registered successfully", result.user());
     }
 
     @PostMapping("/login")
-    public ApiResponse<UserResponse> login(@Valid @RequestBody LoginRequest request,
-                    HttpServletResponse response) {
+    public ApiResponse<UserResponse> login(
+            @Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         AuthResponse result = authService.login(request);
 
-        response.addHeader(HttpHeaders.SET_COOKIE,
-                        authCookie.accessToken(result.accessToken()).toString());
+        response.addHeader(
+                HttpHeaders.SET_COOKIE, authCookie.accessToken(result.accessToken()).toString());
 
-        response.addHeader(HttpHeaders.SET_COOKIE,
-                        authCookie.refreshToken(result.refreshToken()).toString());
+        response.addHeader(
+                HttpHeaders.SET_COOKIE, authCookie.refreshToken(result.refreshToken()).toString());
 
         return ApiResponse.success("User logged in successfully", result.user());
     }
@@ -87,8 +86,10 @@ public class AuthController {
     }
 
     @PostMapping("/change-password")
-    public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request,
-                    Authentication authentication, HttpServletResponse response) {
+    public ResponseEntity<Void> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            Authentication authentication,
+            HttpServletResponse response) {
         if (!(authentication.getPrincipal() instanceof UUID userId)) {
             throw new UnauthorizedException("Invalid authentication");
         }

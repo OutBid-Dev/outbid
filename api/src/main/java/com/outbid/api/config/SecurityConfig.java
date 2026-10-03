@@ -15,8 +15,9 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
-                    CustomAuthenticationEntryPoint authenticationEntryPoint) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            CustomAuthenticationEntryPoint authenticationEntryPoint) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.authenticationEntryPoint = authenticationEntryPoint;
     }
@@ -24,21 +25,29 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                        .sessionManagement(session -> session
-                                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                        .authorizeHttpRequests(auth -> auth
-                                        .requestMatchers("/health", "/auth/register", "/auth/login",
-                                                        "/auth/refresh", "/auth/logout",
+                .sessionManagement(
+                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(
+                        auth ->
+                                auth.requestMatchers(
+                                                "/health",
+                                                "/auth/register",
+                                                "/auth/login",
+                                                "/auth/refresh",
+                                                "/auth/logout",
 
-                                                        // Swagger / OpenAPI
-                                                        "/swagger-ui.html", "/swagger-ui/**",
-                                                        "/v3/api-docs/**")
-                                        .permitAll().anyRequest().authenticated())
-                        .exceptionHandling(exception -> exception
-                                        .authenticationEntryPoint(authenticationEntryPoint))
-                        .addFilterBefore(jwtAuthenticationFilter,
-                                        UsernamePasswordAuthenticationFilter.class)
-                        .httpBasic(AbstractHttpConfigurer::disable);
+                                                // Swagger / OpenAPI
+                                                "/swagger-ui.html",
+                                                "/swagger-ui/**",
+                                                "/v3/api-docs/**")
+                                        .permitAll()
+                                        .anyRequest()
+                                        .authenticated())
+                .exceptionHandling(
+                        exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
+                .addFilterBefore(
+                        jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .httpBasic(AbstractHttpConfigurer::disable);
 
         return http.build();
     }

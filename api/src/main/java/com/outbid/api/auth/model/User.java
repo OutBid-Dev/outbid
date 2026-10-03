@@ -11,6 +11,9 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -36,12 +39,14 @@ public class User {
     private String image;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
     private UserRole role = UserRole.BUYER;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 }

@@ -6,6 +6,7 @@ app:
 
   cookie:
     secure: ${COOKIE_SECURE:false}
+    same-site: ${COOKIE_SAME_SITE:Lax}
 
 server:
   port: 8000

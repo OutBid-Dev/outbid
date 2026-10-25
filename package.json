@@ -9,6 +9,7 @@
         "lint:web": "pnpm --dir web lint",
         "format:web": "pnpm --dir web format",
         "typecheck:web": "pnpm --dir web typecheck",
+        "dev:api": "api\\mvnw.cmd -f api\\pom.xml spring-boot:run",
         "format:api": "api\\mvnw.cmd -f api\\pom.xml spotless:apply",
         "lint:api": "api\\mvnw.cmd -f api\\pom.xml checkstyle:check",
         "test:api": "api\\mvnw.cmd -f api\\pom.xml test",
@@ -18,11 +19,11 @@
     "devEngines": {
         "packageManager": {
             "name": "pnpm",
-            "version": "12.4.2",
+            "version": "12.15.0",
             "onFail": "download"
         }
     },
-    "packageManager": "pnpm@12.4.2",
+    "packageManager": "pnpm@12.15.0",
     "type": "module",
     "devDependencies": {
         "husky": "^9.1.7",

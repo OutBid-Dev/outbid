@@ -1,17 +1,17 @@
 app:
-  jwt:
-    secret: ${JWT_SECRET}
-    access-token-expiration: ${ACCESS_TOKEN_EXPIRATION:15m}
-    refresh-token-expiration: ${REFRESH_TOKEN_EXPIRATION:7d}
+    jwt:
+        secret: ${JWT_SECRET}
+        access-token-expiration: ${ACCESS_TOKEN_EXPIRATION:15m}
+        refresh-token-expiration: ${REFRESH_TOKEN_EXPIRATION:7d}
 
-  cookie:
-    secure: ${COOKIE_SECURE:false}
-    same-site: ${COOKIE_SAME_SITE:Lax}
+    cookie:
+        secure: ${COOKIE_SECURE:false}
+        same-site: ${COOKIE_SAME_SITE:Lax}
 
 server:
-  port: 8000
-  servlet:
-    context-path: /api/v1
+    port: 8000
+    servlet:
+        context-path: /api/v1
 
 spring:
   application:

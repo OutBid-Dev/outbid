@@ -1,24 +1,50 @@
+import { createBrowserRouter, Navigate } from "react-router";
+import LoginPage from "@/features/auth/pages/login-page";
+import RegisterPage from "@/features/auth/pages/register-page";
+import DashboardPage from "@/features/dashboard/pages/dashboard";
 import AuthLayout from "@/layouts/auth-layout";
-import LoginPage from "@/pages/auth/login-page";
-import RegisterPage from "@/pages/auth/register-page";
-import { createBrowserRouter } from "react-router";
+import DashboardLayout from "@/layouts/dashboard-layout";
+import ProtectedRoute from "./protected-route";
 
 const router = createBrowserRouter([
     {
         path: "/",
-        element: <div>Hello World</div>,
+        element: <Navigate to="/dashboard" replace />,
     },
     {
-        element: <AuthLayout />,
         path: "/auth",
         children: [
             {
-                path: "login",
-                element: <LoginPage />,
+                element: <AuthLayout />,
+                children: [
+                    {
+                        path: "login",
+                        element: <LoginPage />,
+                    },
+                    {
+                        path: "register",
+                        element: <RegisterPage />,
+                    },
+                ],
             },
+        ],
+    },
+    {
+        element: <ProtectedRoute />,
+        children: [
             {
-                path: "register",
-                element: <RegisterPage />,
+                path: "/dashboard",
+                children: [
+                    {
+                        element: <DashboardLayout />,
+                        children: [
+                            {
+                                index: true,
+                                element: <DashboardPage />,
+                            },
+                        ],
+                    },
+                ],
             },
         ],
     },

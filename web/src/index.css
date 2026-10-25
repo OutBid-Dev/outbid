@@ -133,3 +133,12 @@
         @apply font-sans;
     }
 }
+
+.login-submit-button-hover {
+    transition: all 0.2s ease;
+}
+
+.login-submit-button-hover:hover {
+    box-shadow: 0 0 15px oklch(0.443 0.11 240.79 / 0.2);
+    transform: translateY(-1px);
+}

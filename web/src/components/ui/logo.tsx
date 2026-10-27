@@ -18,7 +18,7 @@ function Logo({ className, size = "md", shape = "circle" }: LogoProps) {
                 className
             )}
         >
-            <AvatarImage src="/ico.svg" />
+            <AvatarImage src="/icon.svg" />
             <AvatarFallback>O</AvatarFallback>
         </Avatar>
     );

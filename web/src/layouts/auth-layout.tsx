@@ -3,7 +3,7 @@ import { Outlet } from "react-router";
 function AuthLayout() {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center p-4">
-            <div className="grid w-full max-w-5xl gap-5 overflow-hidden rounded-none bg-card p-4 shadow-md md:grid-cols-2">
+            <div className="grid w-full max-w-5xl gap-5 overflow-hidden rounded-md bg-card p-4 shadow-md md:grid-cols-2">
                 <AuthBanner />
                 <div className="flex w-full flex-col justify-center rounded-md">
                     <Outlet />

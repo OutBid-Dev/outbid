@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useId } from "react";
+import { useId, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ import { type LoginFormValues, loginSchema } from "../schemas/login-schema";
 
 function LoginPage() {
     const id = useId();
+    const [showPassword, setShowPassword] = useState(false);
     const { login, isPending, isError, error, reset } = useLogin();
 
     const form = useForm<LoginFormValues>({
@@ -128,6 +129,8 @@ function LoginPage() {
                                 type="password"
                                 required
                                 aria-invalid={!!form.formState.errors.password}
+                                showPassword={showPassword}
+                                setShowPassword={setShowPassword}
                                 {...form.register("password")}
                             />
                             {form.formState.errors.password && (

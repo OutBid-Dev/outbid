@@ -34,6 +34,8 @@ function RegisterPage() {
         resolver: zodResolver(registerSchema),
         mode: "onChange",
         defaultValues: {
+            firstName: "",
+            lastName: "",
             email: "",
             password: "",
         },

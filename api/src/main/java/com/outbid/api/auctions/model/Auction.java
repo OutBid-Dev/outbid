@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -17,6 +19,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -34,7 +37,9 @@ import org.hibernate.type.SqlTypes;
 @Setter
 @NoArgsConstructor
 public class Auction {
-    @Id private UUID id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "seller_id", nullable = false)
@@ -48,7 +53,7 @@ public class Auction {
 
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(name = "item_condition", columnDefinition = "auction_item_condition")
+    @Column(name = "item_condition", nullable = false, columnDefinition = "auction_item_condition")
     private AuctionItemCondition itemCondition;
 
     @Column(length = 100)
@@ -67,7 +72,7 @@ public class Auction {
     @Column(name = "starting_price", nullable = false, precision = 12, scale = 2)
     private BigDecimal startingPrice;
 
-    @Column(name = "current_price", nullable = false, precision = 12, scale = 2)
+    @Column(name = "current_price", precision = 12, scale = 2)
     private BigDecimal currentPrice;
 
     @Column(name = "minimum_bid_increment", nullable = false, precision = 12, scale = 2)
@@ -86,7 +91,7 @@ public class Auction {
 
     @OneToMany(mappedBy = "auction", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("displayOrder ASC")
-    private java.util.List<AuctionImage> images = new ArrayList<>();
+    private List<AuctionImage> images = new ArrayList<>();
 
     @OneToMany(mappedBy = "auction", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AuctionCategoryAssignment> categoryAssignments = new HashSet<>();
@@ -98,4 +103,9 @@ public class Auction {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+    public void addCategoryAssignment(AuctionCategoryAssignment assignment) {
+        categoryAssignments.add(assignment);
+        assignment.setAuction(this);
+    }
 }

@@ -44,8 +44,46 @@ public class AuthorizationService {
         throw new ForbiddenException("You do not have permission to access this resource");
     }
 
+    public boolean hasRole(Authentication authentication, UserRole role) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if (!(principal instanceof UUID userId)) {
+            return false;
+        }
+
+        return userRepository.findById(userId).map(user -> user.getRole() == role).orElse(false);
+    }
+
+    public UUID getOptionalAuthenticatedUserId(Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if (!(principal instanceof UUID userId)) {
+            return null;
+        }
+
+        if (!userRepository.existsById(userId)) {
+            throw new ResourceNotFoundException("User not found");
+        }
+
+        return userId;
+    }
+
     public UUID requireAdmin(Authentication authentication) {
         return requireRole(authentication, UserRole.ADMIN);
+    }
+
+    public UUID requireSeller(Authentication authentication) {
+        return requireRole(authentication, UserRole.SELLER);
     }
 
     public UUID requireSellerOrAdmin(Authentication authentication) {

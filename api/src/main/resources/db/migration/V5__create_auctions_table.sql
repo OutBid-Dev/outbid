@@ -57,7 +57,7 @@ CREATE TABLE auctions
     location              VARCHAR(255),
 
     starting_price        NUMERIC(12, 2)         NOT NULL,
-    current_price         NUMERIC(12, 2)         NOT NULL,
+    current_price         NUMERIC(12, 2),
     minimum_bid_increment NUMERIC(12, 2)         NOT NULL,
 
     start_time            TIMESTAMPTZ,
@@ -130,7 +130,7 @@ CREATE TABLE auction_category_assignments
 );
 
 CREATE INDEX idx_auction_category_assignments_category_id
-    ON auction_category_assignments(category_id);
+    ON auction_category_assignments (category_id);
 
 -- =========================================================
 -- INDEXES

@@ -1,6 +1,6 @@
 package com.outbid.api.auctions.controller;
 
-import com.outbid.api.auctions.dto.request.AuctionCategoryRequest;
+import com.outbid.api.auctions.dto.request.CreateAuctionCategoryRequest;
 import com.outbid.api.auctions.dto.request.UpdateAuctionCategoryRequest;
 import com.outbid.api.auctions.dto.response.AuctionCategoryPageResponse;
 import com.outbid.api.auctions.dto.response.AuctionCategoryResponse;
@@ -37,7 +37,8 @@ public class AuctionCategoryController {
 
     @PostMapping()
     public ResponseEntity<ApiResponse<AuctionCategoryResponse>> createCategory(
-            Authentication authentication, @Valid @RequestBody AuctionCategoryRequest request) {
+            Authentication authentication,
+            @Valid @RequestBody CreateAuctionCategoryRequest request) {
 
         authorizationService.requireAdmin(authentication);
 

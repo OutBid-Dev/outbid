@@ -1,6 +1,6 @@
 package com.outbid.api.auctions.service;
 
-import com.outbid.api.auctions.dto.request.AuctionCategoryRequest;
+import com.outbid.api.auctions.dto.request.CreateAuctionCategoryRequest;
 import com.outbid.api.auctions.dto.request.UpdateAuctionCategoryRequest;
 import com.outbid.api.auctions.dto.response.AuctionCategoryPageResponse;
 import com.outbid.api.auctions.dto.response.AuctionCategoryResponse;
@@ -37,7 +37,7 @@ public class AuctionCategoryServiceImpl implements AuctionCategoryService {
 
     @Override
     @Transactional
-    public AuctionCategoryResponse createCategory(AuctionCategoryRequest request) {
+    public AuctionCategoryResponse createCategory(CreateAuctionCategoryRequest request) {
         String name = normalizeName(request.name());
         String slug = generateSlug(name);
 

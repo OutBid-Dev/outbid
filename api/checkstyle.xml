@@ -68,10 +68,6 @@
         <module name="ParenPad"/>
         <module name="NoWhitespaceBefore"/>
         <module name="MethodParamPad"/>
-        <!-- ================================================== -->
-        <!-- Operators                                           -->
-        <!-- ================================================== -->
-        <module name="OperatorWrap"/>
 
         <!-- ================================================== -->
         <!-- Code structure                                     -->

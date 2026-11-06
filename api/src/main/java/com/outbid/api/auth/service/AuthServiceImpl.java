@@ -48,8 +48,6 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("user with that email already exists");
         }
 
-        Instant now = Instant.now();
-
         User user = new User();
         user.setId(UUID.randomUUID());
         user.setFirstName(request.firstName());
@@ -58,8 +56,6 @@ public class AuthServiceImpl implements AuthService {
         user.setEmailVerified(false);
         user.setImage(request.image());
         user.setRole(UserRole.BUYER);
-        user.setCreatedAt(now);
-        user.setUpdatedAt(now);
 
         User savedUser = userRepository.save(user);
 
@@ -69,8 +65,6 @@ public class AuthServiceImpl implements AuthService {
         account.setAccountId(savedUser.getId().toString());
         account.setProviderId("credential");
         account.setPassword(passwordEncoder.encode(request.password()));
-        account.setCreatedAt(now);
-        account.setUpdatedAt(now);
 
         accountRepository.save(account);
 

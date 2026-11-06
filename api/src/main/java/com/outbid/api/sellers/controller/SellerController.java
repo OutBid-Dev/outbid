@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,7 +31,7 @@ public class SellerController {
 
     @PostMapping("/apply")
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<SellerApplicationResponse> apply(
+    public ResponseEntity<ApiResponse<SellerApplicationResponse>> apply(
             @Valid @RequestBody SellerApplicationRequest request, Authentication authentication) {
         Object principal = authentication.getPrincipal();
 
@@ -40,11 +41,12 @@ public class SellerController {
 
         SellerApplicationResponse response = sellerService.apply(userId, request);
 
-        return ApiResponse.success("Seller application submitted successfully", response);
+        return ApiResponse.success(
+                HttpStatus.CREATED, "Seller application submitted successfully", response);
     }
 
     @GetMapping("/apply")
-    public ApiResponse<List<SellerApplicationSummaryResponse>> getApplications(
+    public ResponseEntity<ApiResponse<List<SellerApplicationSummaryResponse>>> getApplications(
             Authentication authentication) {
 
         Object principal = authentication.getPrincipal();
@@ -55,11 +57,12 @@ public class SellerController {
 
         List<SellerApplicationSummaryResponse> response = sellerService.getApplications(userId);
 
-        return ApiResponse.success("Seller applications retrieved successfully", response);
+        return ApiResponse.success(
+                HttpStatus.OK, "Seller applications retrieved successfully", response);
     }
 
     @GetMapping("/apply/{applicationId}")
-    public ApiResponse<SellerApplicationResponse> getApplicationById(
+    public ResponseEntity<ApiResponse<SellerApplicationResponse>> getApplicationById(
             Authentication authentication, @PathVariable UUID applicationId) {
         Object principal = authentication.getPrincipal();
 
@@ -69,6 +72,7 @@ public class SellerController {
 
         SellerApplicationResponse response = sellerService.getApplication(userId, applicationId);
 
-        return ApiResponse.success("Seller application retrieved successfully", response);
+        return ApiResponse.success(
+                HttpStatus.OK, "Seller application retrieved successfully", response);
     }
 }

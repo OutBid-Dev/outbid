@@ -12,7 +12,6 @@ import com.outbid.api.sellers.dto.response.SellerApplicationSummaryResponse;
 import com.outbid.api.sellers.model.SellerApplication;
 import com.outbid.api.sellers.model.SellerApplicationStatus;
 import com.outbid.api.sellers.repository.SellerApplicationRepository;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -50,15 +49,11 @@ public class SellerServiceImpl implements SellerService {
                     "You already have an active or successful seller application");
         }
 
-        Instant now = Instant.now();
-
         SellerApplication sellerApplication = new SellerApplication();
 
         sellerApplication.setUser(user);
         sellerApplication.setStatus(SellerApplicationStatus.PROCESSING);
         sellerApplication.setReason(request.reason());
-        sellerApplication.setCreatedAt(now);
-        sellerApplication.setUpdatedAt(now);
 
         SellerApplication savedSellerApplication =
                 sellerApplicationRepository.save(sellerApplication);

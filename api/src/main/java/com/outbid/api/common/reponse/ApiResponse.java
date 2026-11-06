@@ -1,11 +1,33 @@
 package com.outbid.api.common.reponse;
 
-public record ApiResponse<T>(boolean success, String response, T data) {
-    public static <T> ApiResponse<T> success(String message, T data) {
-        return new ApiResponse<>(true, message, data);
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+public record ApiResponse<T>(boolean success, int statusCode, String response, T data) {
+
+    public static <T> ResponseEntity<ApiResponse<T>> success(
+            HttpStatus status, String message, T data) {
+
+        return ResponseEntity.status(status)
+                .body(new ApiResponse<>(true, status.value(), message, data));
     }
 
-    public static ApiResponse<Void> success(String message) {
-        return new ApiResponse<>(true, message, null);
+    public static ResponseEntity<ApiResponse<Void>> success(HttpStatus status, String message) {
+
+        return ResponseEntity.status(status)
+                .body(new ApiResponse<>(true, status.value(), message, null));
+    }
+
+    public static <T> ResponseEntity<ApiResponse<T>> error(
+            HttpStatus status, String message, T data) {
+
+        return ResponseEntity.status(status)
+                .body(new ApiResponse<>(false, status.value(), message, data));
+    }
+
+    public static ResponseEntity<ApiResponse<Void>> error(HttpStatus status, String message) {
+
+        return ResponseEntity.status(status)
+                .body(new ApiResponse<>(false, status.value(), message, null));
     }
 }

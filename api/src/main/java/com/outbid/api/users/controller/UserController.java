@@ -1,7 +1,6 @@
 package com.outbid.api.users.controller;
 
 import com.outbid.api.auth.dto.response.UserResponse;
-import com.outbid.api.auth.repository.UserRepository;
 import com.outbid.api.common.exceptions.UnauthorizedException;
 import com.outbid.api.common.reponse.ApiResponse;
 import com.outbid.api.users.dto.request.UpdateUserRequest;
@@ -9,6 +8,8 @@ import com.outbid.api.users.dto.response.PublicUserResponse;
 import com.outbid.api.users.service.UserService;
 import jakarta.validation.Valid;
 import java.util.UUID;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -20,16 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final UserRepository userRepository;
     private final UserService userService;
 
-    public UserController(UserRepository userRepository, UserService userService) {
-        this.userRepository = userRepository;
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @GetMapping("/me")
-    public ApiResponse<UserResponse> getUser(Authentication authentication) {
+    public ResponseEntity<ApiResponse<UserResponse>> getUser(Authentication authentication) {
         Object principal = authentication.getPrincipal();
 
         if (!(principal instanceof UUID userId)) {
@@ -38,11 +37,11 @@ public class UserController {
 
         UserResponse response = userService.getCurrentUser(userId);
 
-        return ApiResponse.success("User retrieved successfully", response);
+        return ApiResponse.success(HttpStatus.OK, "User retrieved successfully", response);
     }
 
     @PatchMapping("/me")
-    public ApiResponse<UserResponse> updateUser(
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(
             @Valid @RequestBody UpdateUserRequest request, Authentication authentication) {
         Object principal = authentication.getPrincipal();
 
@@ -52,11 +51,11 @@ public class UserController {
 
         UserResponse response = userService.updateCurrentUser(userId, request);
 
-        return ApiResponse.success("User updated successfully", response);
+        return ApiResponse.success(HttpStatus.OK, "User updated successfully", response);
     }
 
     @GetMapping("/{userId}")
-    public ApiResponse<PublicUserResponse> getUserById(@PathVariable UUID userId) {
+    public ResponseEntity<ApiResponse<PublicUserResponse>> getUserById(@PathVariable UUID userId) {
         UserResponse userResponse = userService.getUserById(userId);
 
         PublicUserResponse publicUserResponse =
@@ -69,6 +68,7 @@ public class UserController {
                         userResponse.role(),
                         userResponse.createdAt());
 
-        return ApiResponse.success("User retrieved successfully", publicUserResponse);
+        return ApiResponse.success(
+                HttpStatus.OK, "User retrieved successfully", publicUserResponse);
     }
 }

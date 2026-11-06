@@ -110,15 +110,25 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
 
     private String resolveRoute(HttpServletRequest request) {
         Object route = request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+
+        String requestUri;
+
         if (route instanceof String routePattern) {
-            return routePattern;
+            requestUri = routePattern;
+        } else {
+            requestUri = request.getRequestURI();
+
+            String contextPath = request.getContextPath();
+
+            if (!contextPath.isEmpty() && requestUri.startsWith(contextPath)) {
+                requestUri = requestUri.substring(contextPath.length());
+            }
         }
 
-        String requestUri = request.getRequestURI();
-        String contextPath = request.getContextPath();
+        String queryString = request.getQueryString();
 
-        if (!contextPath.isEmpty() && requestUri.startsWith(contextPath)) {
-            requestUri = requestUri.substring(contextPath.length());
+        if (queryString != null) {
+            requestUri += "?" + queryString;
         }
 
         return requestUri;

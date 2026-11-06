@@ -7,6 +7,7 @@ import com.outbid.api.common.exceptions.ResourceNotFoundException;
 import com.outbid.api.users.dto.request.UpdateUserRequest;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -35,6 +36,7 @@ public class UserServiceImpl implements UserService {
                 user.getUpdatedAt());
     }
 
+    @Transactional
     @Override
     public UserResponse updateCurrentUser(UUID userId, UpdateUserRequest updateUserRequest) {
         User user =

@@ -1,8 +1,8 @@
 package com.outbid.api.users.controller;
 
 import com.outbid.api.auth.dto.response.UserResponse;
-import com.outbid.api.common.exceptions.UnauthorizedException;
 import com.outbid.api.common.reponse.ApiResponse;
+import com.outbid.api.common.security.AuthorizationService;
 import com.outbid.api.users.dto.request.UpdateUserRequest;
 import com.outbid.api.users.dto.response.PublicUserResponse;
 import com.outbid.api.users.service.UserService;
@@ -22,18 +22,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
+    private final AuthorizationService authorizationService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, AuthorizationService authorizationService) {
         this.userService = userService;
+        this.authorizationService = authorizationService;
     }
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserResponse>> getUser(Authentication authentication) {
-        Object principal = authentication.getPrincipal();
-
-        if (!(principal instanceof UUID userId)) {
-            throw new UnauthorizedException("Invalid authentication");
-        }
+        UUID userId = authorizationService.getOptionalAuthenticatedUserId(authentication);
 
         UserResponse response = userService.getCurrentUser(userId);
 
@@ -43,11 +41,7 @@ public class UserController {
     @PatchMapping("/me")
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(
             @Valid @RequestBody UpdateUserRequest request, Authentication authentication) {
-        Object principal = authentication.getPrincipal();
-
-        if (!(principal instanceof UUID userId)) {
-            throw new UnauthorizedException("Invalid authentication");
-        }
+        UUID userId = authorizationService.getOptionalAuthenticatedUserId(authentication);
 
         UserResponse response = userService.updateCurrentUser(userId, request);
 

@@ -1,7 +1,7 @@
 package com.outbid.api.sellers.controller;
 
-import com.outbid.api.common.exceptions.UnauthorizedException;
 import com.outbid.api.common.reponse.ApiResponse;
+import com.outbid.api.common.security.AuthorizationService;
 import com.outbid.api.sellers.dto.request.SellerApplicationRequest;
 import com.outbid.api.sellers.dto.response.SellerApplicationResponse;
 import com.outbid.api.sellers.dto.response.SellerApplicationSummaryResponse;
@@ -24,20 +24,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/seller")
 public class SellerController {
     private final SellerService sellerService;
+    private final AuthorizationService authorizationService;
 
-    public SellerController(SellerService sellerService) {
+    public SellerController(
+            SellerService sellerService, AuthorizationService authorizationService) {
         this.sellerService = sellerService;
+        this.authorizationService = authorizationService;
     }
 
     @PostMapping("/apply")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<ApiResponse<SellerApplicationResponse>> apply(
             @Valid @RequestBody SellerApplicationRequest request, Authentication authentication) {
-        Object principal = authentication.getPrincipal();
-
-        if (!(principal instanceof UUID userId)) {
-            throw new UnauthorizedException("Invalid authentication");
-        }
+        UUID userId = authorizationService.getOptionalAuthenticatedUserId(authentication);
 
         SellerApplicationResponse response = sellerService.apply(userId, request);
 
@@ -48,12 +47,7 @@ public class SellerController {
     @GetMapping("/apply")
     public ResponseEntity<ApiResponse<List<SellerApplicationSummaryResponse>>> getApplications(
             Authentication authentication) {
-
-        Object principal = authentication.getPrincipal();
-
-        if (!(principal instanceof UUID userId)) {
-            throw new UnauthorizedException("Invalid authentication");
-        }
+        UUID userId = authorizationService.getOptionalAuthenticatedUserId(authentication);
 
         List<SellerApplicationSummaryResponse> response = sellerService.getApplications(userId);
 
@@ -64,11 +58,7 @@ public class SellerController {
     @GetMapping("/apply/{applicationId}")
     public ResponseEntity<ApiResponse<SellerApplicationResponse>> getApplicationById(
             Authentication authentication, @PathVariable UUID applicationId) {
-        Object principal = authentication.getPrincipal();
-
-        if (!(principal instanceof UUID userId)) {
-            throw new UnauthorizedException("Invalid authentication");
-        }
+        UUID userId = authorizationService.getOptionalAuthenticatedUserId(authentication);
 
         SellerApplicationResponse response = sellerService.getApplication(userId, applicationId);
 

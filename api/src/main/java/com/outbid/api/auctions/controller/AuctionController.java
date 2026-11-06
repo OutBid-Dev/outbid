@@ -1,18 +1,22 @@
 package com.outbid.api.auctions.controller;
 
+import com.outbid.api.auctions.dto.request.AuctionSearchRequest;
 import com.outbid.api.auctions.dto.request.CreateAuctionRequest;
 import com.outbid.api.auctions.dto.request.UpdateAuctionCategoriesRequest;
 import com.outbid.api.auctions.dto.request.UpdateAuctionImagesRequest;
 import com.outbid.api.auctions.dto.request.UpdateAuctionRequest;
 import com.outbid.api.auctions.dto.request.UpdateAuctionSpecificationsRequest;
 import com.outbid.api.auctions.dto.response.AuctionResponse;
+import com.outbid.api.auctions.model.AuctionItemCondition;
+import com.outbid.api.auctions.model.AuctionStatus;
 import com.outbid.api.auctions.service.AuctionService;
 import com.outbid.api.auth.model.UserRole;
 import com.outbid.api.common.reponse.ApiResponse;
 import com.outbid.api.common.security.AuthorizationService;
 import jakarta.validation.Valid;
-import java.util.List;
+import java.math.BigDecimal;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -51,40 +55,64 @@ public class AuctionController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<AuctionResponse>>> getAllAuctions(
-            Authentication authentication,
-            @RequestParam(required = false) Boolean mine,
-            @RequestParam(required = false) UUID sellerId) {
+    public ResponseEntity<ApiResponse<Page<AuctionResponse>>> getAllAuctions(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) UUID categoryId,
+            @RequestParam(required = false) AuctionStatus status,
+            @RequestParam(required = false) AuctionItemCondition itemCondition,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String location,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String direction,
+            @RequestParam(defaultValue = "false") boolean mine,
+            @RequestParam(required = false) UUID sellerId,
+            Authentication authentication) {
 
-        if (Boolean.TRUE.equals(mine) && sellerId != null) {
+        if (mine && sellerId != null) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "The mine and sellerId parameters cannot be used together");
         }
 
-        List<AuctionResponse> auctions;
+        boolean admin = authorizationService.hasRole(authentication, UserRole.ADMIN);
 
-        if (Boolean.TRUE.equals(mine)) {
+        UUID requestedSellerId = null;
+        boolean includeDrafts = false;
 
-            UUID authenticatedSellerId =
-                    authorizationService.requireRole(authentication, UserRole.SELLER);
+        if (mine) {
+            requestedSellerId = authorizationService.requireRole(authentication, UserRole.SELLER);
 
-            auctions = auctionService.getMyAuctions(authenticatedSellerId);
-
+            includeDrafts = true;
         } else if (sellerId != null) {
-
             authorizationService.requireAdmin(authentication);
 
-            auctions = auctionService.getAuctionsBySeller(sellerId);
-
-        } else if (authorizationService.hasRole(authentication, UserRole.ADMIN)) {
-
-            auctions = auctionService.getAllAuctions();
-
-        } else {
-
-            auctions = auctionService.getPublicAuctions();
+            requestedSellerId = sellerId;
+            includeDrafts = true;
+        } else if (admin) {
+            includeDrafts = true;
         }
+
+        AuctionSearchRequest request =
+                new AuctionSearchRequest(
+                        search,
+                        categoryId,
+                        status,
+                        itemCondition,
+                        minPrice,
+                        maxPrice,
+                        brand,
+                        location,
+                        page,
+                        size,
+                        sortBy,
+                        direction);
+
+        Page<AuctionResponse> auctions =
+                auctionService.searchAuctions(request, requestedSellerId, includeDrafts);
 
         return ApiResponse.success(HttpStatus.OK, "Auctions retrieved successfully", auctions);
     }

@@ -1,5 +1,6 @@
 package com.outbid.api.auctions.service;
 
+import com.outbid.api.auctions.dto.request.AuctionSearchRequest;
 import com.outbid.api.auctions.dto.request.CreateAuctionRequest;
 import com.outbid.api.auctions.dto.request.UpdateAuctionCategoriesRequest;
 import com.outbid.api.auctions.dto.request.UpdateAuctionImagesRequest;
@@ -17,18 +18,29 @@ import com.outbid.api.auth.model.User;
 import com.outbid.api.auth.repository.UserRepository;
 import com.outbid.api.common.exceptions.ForbiddenException;
 import com.outbid.api.common.exceptions.ResourceNotFoundException;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AuctionServiceImpl implements AuctionService {
@@ -154,14 +166,148 @@ public class AuctionServiceImpl implements AuctionService {
                                                 "Auction not found with id: " + id));
 
         boolean isOwner = auction.getSeller().getId().equals(viewerId);
+        boolean isDraft = auction.getStatus() == AuctionStatus.DRAFT;
 
-        boolean isPublic = auction.getStatus() == AuctionStatus.ACTIVE;
-
-        if (!isPublic && !isOwner && !admin) {
+        if (isDraft && !isOwner && !admin) {
             throw new ResourceNotFoundException("Auction not found with id: " + id);
         }
 
         return AuctionResponse.from(auction);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AuctionResponse> searchAuctions(
+            AuctionSearchRequest request, UUID sellerId, boolean includeDrafts) {
+
+        if (request.minPrice() != null
+                && request.maxPrice() != null
+                && request.minPrice().compareTo(request.maxPrice()) > 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Minimum price cannot be greater than maximum price");
+        }
+
+        Specification<Auction> specification =
+                (root, query, criteriaBuilder) -> {
+                    List<Predicate> predicates = new ArrayList<>();
+
+                    if (!includeDrafts) {
+                        predicates.add(
+                                criteriaBuilder.notEqual(root.get("status"), AuctionStatus.DRAFT));
+                    }
+
+                    if (sellerId != null) {
+                        predicates.add(
+                                criteriaBuilder.equal(root.get("seller").get("id"), sellerId));
+                    }
+
+                    if (request.search() != null && !request.search().isBlank()) {
+                        String searchTerm =
+                                "%" + request.search().trim().toLowerCase(Locale.ROOT) + "%";
+
+                        predicates.add(
+                                criteriaBuilder.or(
+                                        criteriaBuilder.like(
+                                                criteriaBuilder.lower(root.get("title")),
+                                                searchTerm),
+                                        criteriaBuilder.like(
+                                                criteriaBuilder.lower(root.get("description")),
+                                                searchTerm),
+                                        criteriaBuilder.like(
+                                                criteriaBuilder.lower(
+                                                        criteriaBuilder.coalesce(
+                                                                root.get("brand"), "")),
+                                                searchTerm),
+                                        criteriaBuilder.like(
+                                                criteriaBuilder.lower(
+                                                        criteriaBuilder.coalesce(
+                                                                root.get("model"), "")),
+                                                searchTerm)));
+                    }
+
+                    if (request.categoryId() != null) {
+                        Join<?, ?> assignments = root.join("categoryAssignments", JoinType.INNER);
+
+                        Join<?, ?> category = assignments.join("category", JoinType.INNER);
+
+                        predicates.add(
+                                criteriaBuilder.equal(category.get("id"), request.categoryId()));
+
+                        query.distinct(true);
+                    }
+
+                    if (request.status() != null) {
+                        predicates.add(criteriaBuilder.equal(root.get("status"), request.status()));
+                    }
+
+                    if (request.itemCondition() != null) {
+                        predicates.add(
+                                criteriaBuilder.equal(
+                                        root.get("itemCondition"), request.itemCondition()));
+                    }
+
+                    if (request.minPrice() != null) {
+                        predicates.add(
+                                criteriaBuilder.greaterThanOrEqualTo(
+                                        root.get("startingPrice"), request.minPrice()));
+                    }
+
+                    if (request.maxPrice() != null) {
+                        predicates.add(
+                                criteriaBuilder.lessThanOrEqualTo(
+                                        root.get("startingPrice"), request.maxPrice()));
+                    }
+
+                    if (request.brand() != null && !request.brand().isBlank()) {
+                        predicates.add(
+                                criteriaBuilder.like(
+                                        criteriaBuilder.lower(
+                                                criteriaBuilder.coalesce(root.get("brand"), "")),
+                                        "%"
+                                                + request.brand().trim().toLowerCase(Locale.ROOT)
+                                                + "%"));
+                    }
+
+                    if (request.location() != null && !request.location().isBlank()) {
+                        predicates.add(
+                                criteriaBuilder.like(
+                                        criteriaBuilder.lower(
+                                                criteriaBuilder.coalesce(root.get("location"), "")),
+                                        "%"
+                                                + request.location().trim().toLowerCase(Locale.ROOT)
+                                                + "%"));
+                    }
+
+                    return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+                };
+
+        int page = request.page() == null ? 0 : Math.max(request.page(), 0);
+        int size = request.size() == null ? 12 : Math.clamp(request.size(), 1, 100);
+
+        List<String> allowedSortFields =
+                List.of(
+                        "createdAt",
+                        "updatedAt",
+                        "title",
+                        "startingPrice",
+                        "currentPrice",
+                        "startTime",
+                        "endTime");
+
+        String sortBy = request.sortBy() == null ? "createdAt" : request.sortBy();
+
+        if (!allowedSortFields.contains(sortBy)) {
+            throw new IllegalArgumentException("Invalid sort field: " + sortBy);
+        }
+
+        Sort.Direction direction =
+                "ASC".equalsIgnoreCase(request.direction())
+                        ? Sort.Direction.ASC
+                        : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        return auctionRepository.findAll(specification, pageable).map(AuctionResponse::from);
     }
 
     @Override

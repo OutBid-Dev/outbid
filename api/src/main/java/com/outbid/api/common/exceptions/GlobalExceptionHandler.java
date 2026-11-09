@@ -4,12 +4,14 @@ import com.outbid.api.common.reponse.ApiError;
 import com.outbid.api.common.reponse.ValidationError;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
@@ -79,6 +81,15 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(ApiError.of(exception.getMessage()));
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiError> handleResponseStatus(ResponseStatusException ex) {
+
+        HttpStatusCode status = ex.getStatusCode();
+
+        return ResponseEntity.status(status)
+                .body(ApiError.of(ex.getReason() != null ? ex.getReason() : "Request failed"));
     }
 
     @ExceptionHandler(Exception.class)

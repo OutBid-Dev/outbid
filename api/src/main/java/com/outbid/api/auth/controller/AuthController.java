@@ -7,8 +7,8 @@ import com.outbid.api.auth.dto.response.AuthResponse;
 import com.outbid.api.auth.dto.response.UserResponse;
 import com.outbid.api.auth.security.AuthCookie;
 import com.outbid.api.auth.service.AuthService;
-import com.outbid.api.common.exceptions.UnauthorizedException;
 import com.outbid.api.common.reponse.ApiResponse;
+import com.outbid.api.common.security.AuthorizationService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,10 +28,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
     private final AuthService authService;
     private final AuthCookie authCookie;
+    private final AuthorizationService authorizationService;
 
-    public AuthController(AuthService authService, AuthCookie authCookie) {
+    public AuthController(
+            AuthService authService,
+            AuthCookie authCookie,
+            AuthorizationService authorizationService) {
         this.authService = authService;
         this.authCookie = authCookie;
+        this.authorizationService = authorizationService;
     }
 
     @PostMapping("/register")
@@ -93,9 +98,7 @@ public class AuthController {
             @Valid @RequestBody ChangePasswordRequest request,
             Authentication authentication,
             HttpServletResponse response) {
-        if (!(authentication.getPrincipal() instanceof UUID userId)) {
-            throw new UnauthorizedException("Invalid authentication");
-        }
+        UUID userId = authorizationService.getOptionalAuthenticatedUserId(authentication);
 
         authService.changePassword(userId, request);
 

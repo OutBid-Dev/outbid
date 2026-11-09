@@ -13,6 +13,8 @@ import com.outbid.api.auth.repository.UserRepository;
 import com.outbid.api.auth.security.JWTService;
 import com.outbid.api.common.exceptions.BadRequestException;
 import com.outbid.api.common.exceptions.UnauthorizedException;
+import com.outbid.api.wallet.model.Wallet;
+import com.outbid.api.wallet.repository.WalletRepository;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -27,18 +29,21 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
     private final RefreshTokenService refreshTokenService;
+    private final WalletRepository walletRepository;
 
     public AuthServiceImpl(
             UserRepository userRepository,
             AccountRepository accountRepository,
             PasswordEncoder passwordEncoder,
             JWTService jwtService,
-            RefreshTokenService refreshTokenService) {
+            RefreshTokenService refreshTokenService,
+            WalletRepository walletRepository) {
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
+        this.walletRepository = walletRepository;
     }
 
     @Override
@@ -58,6 +63,8 @@ public class AuthServiceImpl implements AuthService {
         user.setRole(UserRole.BUYER);
 
         User savedUser = userRepository.save(user);
+
+        walletRepository.save(new Wallet(user.getId()));
 
         Account account = new Account();
         account.setId(UUID.randomUUID());

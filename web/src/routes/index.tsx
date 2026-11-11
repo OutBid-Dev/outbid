@@ -1,8 +1,9 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import LoginPage from "@/features/auth/pages/login-page";
 import RegisterPage from "@/features/auth/pages/register-page";
+import AuctionsPage from "@/features/dashboard/pages/auctions";
+import CreateAuction from "@/features/dashboard/pages/create-auction";
 import DashboardPage from "@/features/dashboard/pages/dashboard";
-import DashboardProfile from "@/features/dashboard/pages/dashboard-profile";
 import AuthLayout from "@/layouts/auth-layout";
 import DashboardLayout from "@/layouts/dashboard-layout";
 import ProtectedRoute from "./protected-route";
@@ -44,8 +45,17 @@ const router = createBrowserRouter([
                                 element: <DashboardPage />,
                             },
                             {
-                                path: "profile",
-                                element: <DashboardProfile />,
+                                path: "auctions",
+                                children: [
+                                    {
+                                        index: true,
+                                        element: <AuctionsPage />,
+                                    },
+                                    {
+                                        path: "create",
+                                        element: <CreateAuction />,
+                                    },
+                                ],
                             },
                         ],
                     },

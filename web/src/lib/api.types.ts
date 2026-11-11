@@ -1,5 +1,6 @@
 export interface ApiSuccessResponse<T> {
     success: true;
+    statusCode: number;
     response: string;
     data: T;
 }

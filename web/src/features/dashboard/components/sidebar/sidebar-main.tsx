@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import {
     SidebarGroup,
     SidebarGroupContent,
@@ -9,31 +9,35 @@ import {
 import { DASHBOARD_TABS } from "@/lib/app-data";
 
 export default function SidebarMain() {
-    const currentPath = window.location.pathname;
+    const { pathname } = useLocation();
 
     return (
         <SidebarGroup>
             <SidebarGroupContent className="flex flex-col gap-2">
                 <SidebarMenu className="gap-2">
-                    {DASHBOARD_TABS.map((item) => (
-                        <SidebarMenuItem key={item.id}>
-                            <Link
-                                to={item.url}
-                                className={`${currentPath === item.url && "hover:bg-primary"}`}
-                            >
-                                <SidebarMenuButton
-                                    tooltip={item.name}
-                                    className={` ${
-                                        currentPath === item.url &&
-                                        "bg-primary text-primary-foreground hover:bg-primary"
-                                    }`}
+                    {DASHBOARD_TABS.map((item) => {
+                        const isActive = pathname === item.url;
+
+                        return (
+                            <SidebarMenuItem key={item.id}>
+                                <Link
+                                    to={item.url}
+                                    className={`${isActive && "hover:bg-primary"}`}
                                 >
-                                    {item.icon && <item.icon />}
-                                    <span>{item.name}</span>
-                                </SidebarMenuButton>
-                            </Link>
-                        </SidebarMenuItem>
-                    ))}
+                                    <SidebarMenuButton
+                                        tooltip={item.name}
+                                        className={` ${
+                                            isActive &&
+                                            "bg-primary text-primary-foreground hover:bg-primary"
+                                        }`}
+                                    >
+                                        {item.icon && <item.icon />}
+                                        <span>{item.name}</span>
+                                    </SidebarMenuButton>
+                                </Link>
+                            </SidebarMenuItem>
+                        );
+                    })}
                 </SidebarMenu>
             </SidebarGroupContent>
         </SidebarGroup>

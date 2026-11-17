@@ -1,6 +1,25 @@
+export type ItemCondition =
+    "NEW" | "LIKE_NEW" | "USED_GOOD" | "USED_FAIR" | "FOR_PARTS";
+
 export type AuctionStatus = "SCHEDULED" | "ACTIVE" | "COMPLETED" | "CANCELLED";
 
-export type ItemCondition = "NEW" | "LIKE_NEW" | "GOOD" | "FAIR" | "POOR";
+export interface AuctionCategory {
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface AuctionImage {
+    id: string;
+    imageUrl: string;
+    displayOrder: number;
+    primary: boolean;
+}
+
+export type AuctionSpecifications = Record<string, string>;
 
 export interface AuctionResponse {
     id: string;
@@ -19,18 +38,9 @@ export interface AuctionResponse {
     status: AuctionStatus;
     sellerId: string;
     categoryIds: string[];
-    images: AuctionImageResponse[];
+    images: AuctionImage[];
     createdAt: string;
     updatedAt: string;
-}
-
-export type AuctionSpecifications = Record<string, string>;
-
-export interface AuctionImageResponse {
-    id: string;
-    url: string;
-    isPrimary: boolean;
-    displayOrder: number;
 }
 
 export interface SortResponse {
@@ -60,4 +70,17 @@ export interface PageResponse<T> {
     sort: SortResponse;
     totalElements: number;
     totalPages: number;
+}
+
+export interface AuctionCategoriesResponse {
+    content: AuctionCategory[];
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    first: boolean;
+    last: boolean;
+    sortBy: string;
+    sortDir: string;
+    search: string | null;
 }

@@ -4,6 +4,8 @@ import RegisterPage from "@/features/auth/pages/register-page";
 import AuctionsPage from "@/features/dashboard/pages/auctions";
 import CreateAuction from "@/features/dashboard/pages/create-auction";
 import DashboardPage from "@/features/dashboard/pages/dashboard";
+import DashboardProfile from "@/features/dashboard/pages/dashboard-profile";
+import EditAuction from "@/features/dashboard/pages/edit-auction";
 import AuthLayout from "@/layouts/auth-layout";
 import DashboardLayout from "@/layouts/dashboard-layout";
 import ProtectedRoute from "./protected-route";
@@ -35,7 +37,7 @@ const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
             {
-                path: "/dashboard",
+                path: "dashboard",
                 children: [
                     {
                         element: <DashboardLayout />,
@@ -43,6 +45,10 @@ const router = createBrowserRouter([
                             {
                                 index: true,
                                 element: <DashboardPage />,
+                            },
+                            {
+                                path: "profile",
+                                element: <DashboardProfile />,
                             },
                             {
                                 path: "auctions",
@@ -54,6 +60,10 @@ const router = createBrowserRouter([
                                     {
                                         path: "create",
                                         element: <CreateAuction />,
+                                    },
+                                    {
+                                        path: ":auctionId",
+                                        element: <EditAuction />,
                                     },
                                 ],
                             },

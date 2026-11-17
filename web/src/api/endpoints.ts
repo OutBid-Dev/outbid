@@ -35,6 +35,7 @@ export const ENDPOINTS = {
         list: "/auctions",
         listForSeller: "/auctions?mine=true",
         byId: (auctionId: string) => `/auctions/${auctionId}`,
+        categories: "/auction-categories",
     },
 
     health: "/health",

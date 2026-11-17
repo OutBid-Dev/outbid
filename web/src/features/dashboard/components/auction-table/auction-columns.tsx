@@ -1,13 +1,12 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import { CalendarClock, CircleDashed, Tag } from "lucide-react";
-
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { getDataTableSelectColumn } from "@/components/data-table/data-table-select-column";
 import { Badge } from "@/components/ui/badge";
 import type { DataTableFeatures } from "@/lib/data-table-features";
 import { formatDate } from "@/lib/format";
-
 import type { AuctionResponse } from "../../types/auction-types";
+import { AuctionRowActions } from "./auction-column-row-action";
 
 const columnHelper = createColumnHelper<DataTableFeatures, AuctionResponse>();
 
@@ -111,5 +110,18 @@ export const auctionTableColumns = columnHelper.columns([
             </div>
         ),
         enableSorting: false,
+    }),
+
+    columnHelper.display({
+        id: "actions",
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} label="Actions" />
+        ),
+        cell: ({ row }) => <AuctionRowActions auction={row.original} />,
+        enableSorting: false,
+        enableHiding: false,
+        size: 80,
+        minSize: 80,
+        maxSize: 80,
     }),
 ]);

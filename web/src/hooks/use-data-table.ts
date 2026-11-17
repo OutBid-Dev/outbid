@@ -18,14 +18,6 @@ import {
     useQueryStates,
 } from "nuqs";
 import * as React from "react";
-
-import type {
-    ColumnFilterItem,
-    DataTableQueryKeys,
-    FilterVariant,
-    JoinOperator,
-} from "@/lib/data-table-types";
-
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 import {
     type DataTableFeatures,
@@ -38,6 +30,12 @@ import {
     getSortingStateParser,
     sortColumnFiltersBySearch,
 } from "@/lib/data-table-parsers";
+import type {
+    ColumnFilterItem,
+    DataTableQueryKeys,
+    FilterVariant,
+    JoinOperator,
+} from "@/lib/data-table-types";
 import {
     getActiveFilters,
     getColumnId,
@@ -478,10 +476,11 @@ function selectTableState(state: TableState<DataTableFeatures>) {
         joinOperator: state.joinOperator,
         pagination: state.pagination,
         sorting: state.sorting,
+        rowSelection: state.rowSelection,
     };
 }
 
-export { useDataTable, type UseDataTableProps };
+export { type UseDataTableProps, useDataTable };
 
 function useChainedUpdate<TValue>(value: TValue) {
     const pendingRef = React.useRef<{ base: TValue; next: TValue } | null>(

@@ -1,12 +1,13 @@
+import { LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { useLogout } from "@/features/auth/hooks/use-logout";
-import SidebarUserButtons from "./sidebar-user-buttons";
 import SidebarUserRoleBadge from "./sidebar-user-role-badge";
 
 export default function SidebarUser() {
     const { data, isError } = useCurrentUser();
-    const { isPending: isLoggingOut } = useLogout();
+    const { logout, isPending: isLoggingOut } = useLogout();
 
     if (isLoggingOut) {
         return (
@@ -27,7 +28,7 @@ export default function SidebarUser() {
     }
 
     return (
-        <div className="relative flex flex-col gap-4 rounded-md border-2 border-dashed border-foreground/20 p-3">
+        <div className="relative flex flex-col gap-4 rounded-md border-2 border-dashed border-foreground/20 p-2">
             <div className="flex items-center gap-2">
                 <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage
@@ -52,9 +53,17 @@ export default function SidebarUser() {
                         {data?.email}
                     </span>
                 </div>
+                <Button
+                    variant="destructive"
+                    size="icon"
+                    className="mt-2 rounded-full"
+                    aria-label="Log out"
+                    onClick={() => logout()}
+                    disabled={isLoggingOut}
+                >
+                    <LogOut className="h-4 w-4" />
+                </Button>
             </div>
-
-            <SidebarUserButtons />
         </div>
     );
 }

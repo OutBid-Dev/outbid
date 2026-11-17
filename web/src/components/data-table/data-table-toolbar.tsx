@@ -7,14 +7,8 @@ import {
     Subscribe,
 } from "@tanstack/react-table";
 import { cn } from "cn";
+import { Trash2, X } from "lucide-react";
 import * as React from "react";
-
-import type { DataTableFeatures } from "@/lib/data-table-features";
-
-import {
-    getColumnSelectOptions,
-    getFilterVariant,
-} from "@/lib/data-table-utils";
 import { DataTableDateFilter } from "@/components/data-table/data-table-date-filter";
 import { DataTableFacetedFilter } from "@/components/data-table/data-table-faceted-filter";
 import { DataTableSliderFilter } from "@/components/data-table/data-table-slider-filter";
@@ -27,18 +21,28 @@ import {
     InputGroupInput,
     InputGroupText,
 } from "@/components/ui/input-group";
-import { X } from "lucide-react";
+import type { DataTableFeatures } from "@/lib/data-table-features";
+import {
+    getColumnSelectOptions,
+    getFilterVariant,
+} from "@/lib/data-table-utils";
 
 interface DataTableToolbarProps<
     TData extends RowData,
 > extends React.ComponentProps<"div"> {
     table: ReactTable<DataTableFeatures, TData, unknown>;
     globalFilterPlaceholder?: string;
+    selectedCount?: number;
+    onDeleteSelected?: () => void;
+    isDeleting?: boolean;
 }
 
 export function DataTableToolbar<TData extends RowData>({
     table,
     globalFilterPlaceholder,
+    selectedCount = 0,
+    onDeleteSelected,
+    isDeleting = false,
     children,
     className,
     ...props
@@ -109,6 +113,19 @@ export function DataTableToolbar<TData extends RowData>({
                 </table.Subscribe>
             </div>
             <div className="flex items-center gap-2">
+                {selectedCount > 0 && onDeleteSelected && (
+                    <Button
+                        variant="destructive"
+                        onClick={onDeleteSelected}
+                        disabled={isDeleting}
+                        className="py-2"
+                    >
+                        <Trash2 />
+                        {isDeleting
+                            ? "Deleting..."
+                            : `Delete (${selectedCount})`}
+                    </Button>
+                )}
                 {children}
                 <DataTableViewOptions table={table} align="end" />
             </div>

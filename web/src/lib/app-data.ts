@@ -1,4 +1,4 @@
-import { GavelIcon, LayoutDashboardIcon } from "lucide-react";
+import { GavelIcon, LayoutDashboardIcon, UserCog2Icon } from "lucide-react";
 
 export const REGISTER_OPTIONS = [
     {
@@ -13,17 +13,37 @@ export const REGISTER_OPTIONS = [
     },
 ];
 
-export const DASHBOARD_TABS = [
-    {
-        id: "d-dashboard",
-        name: "Dashboard",
-        url: "/dashboard",
-        icon: LayoutDashboardIcon,
-    },
-    {
-        id: "d-auctions",
-        name: "Auctions",
-        url: "/dashboard/auctions",
-        icon: GavelIcon,
-    },
-];
+export const DASHBOARD_TABS = {
+    main: [
+        {
+            id: "d-dashboard",
+            name: "Dashboard",
+            url: "/dashboard",
+            icon: LayoutDashboardIcon,
+        },
+        {
+            id: "d-auctions",
+            name: "Auctions",
+            url: "/dashboard/auctions",
+            icon: GavelIcon,
+            items: [
+                {
+                    title: "All Auctions",
+                    url: "/dashboard/auctions",
+                },
+                {
+                    title: "Create Auction",
+                    url: "/dashboard/auctions/create",
+                },
+            ],
+        },
+    ],
+    secondary: [
+        {
+            id: "d-profile",
+            name: "Profile",
+            url: "/dashboard/profile",
+            icon: UserCog2Icon,
+        },
+    ],
+};

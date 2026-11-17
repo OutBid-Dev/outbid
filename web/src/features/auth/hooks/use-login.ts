@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import { toast } from "@/components/ui/toast";
 import type { User } from "@/lib/api.types";
-import { type ParsedError, parseApiError } from "@/utils/error-handler";
+import { type ParsedError, parseApiError } from "@/lib/error-handler";
 import { loginService } from "../services/auth-service";
 import type { LoginPayload } from "../types/auth-types";
 import { currentUserQueryKey } from "./use-current-user";

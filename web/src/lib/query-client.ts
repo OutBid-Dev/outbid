@@ -1,5 +1,5 @@
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
-import { parseApiError } from "@/utils/error-handler";
+import { parseApiError } from "@/lib/error-handler";
 
 const queryClient = new QueryClient({
     queryCache: new QueryCache({

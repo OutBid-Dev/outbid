@@ -31,5 +31,12 @@ export const ENDPOINTS = {
             `/admin/seller-applications/${applicationId}/reject`,
     },
 
+    auctions: {
+        list: "/auctions",
+        listForSeller: "/auctions?mine=true",
+        byId: (auctionId: string) => `/auctions/${auctionId}`,
+        categories: "/auction-categories",
+    },
+
     health: "/health",
 } as const;
